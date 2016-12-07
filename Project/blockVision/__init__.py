@@ -40,6 +40,7 @@ class BlockVision:
             self.drawCenters(color)
 
     def findBlocks(self,color):
+        self.blocks[color] = []
         self.height, self.width, c = self.image.shape
 
         #convert the image to HSV space

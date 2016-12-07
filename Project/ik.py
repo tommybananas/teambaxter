@@ -61,7 +61,7 @@ def calc(xi,yi,zi):
                    }.get(resp_seeds[0], 'None')
         # Format solution into Limb API-compatible dictionary
         limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
-        print limb_joints
+        # print limb_joints
     else:
         print("INVALID POSE - No Valid Joint Solution Found.")
 

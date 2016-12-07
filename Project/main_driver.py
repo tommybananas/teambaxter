@@ -81,7 +81,10 @@ def get_closest_block(color, showImage=False):
 
 ##
  # go to the location specified by x, y, z coordinates
+global current_loc
 def go_to(x, y, z):
+	global current_loc
+	current_loc = (x,y,z)
 	pos = ik.calc(x, y, z)
 	limb.move_to_joint_positions(pos)
 
@@ -115,26 +118,45 @@ def main():
 	go_to(*start)
 
 	'''Find a block location and color'''
-	x, y, p = get_closest_block("red", True)
-	cam_x = x - 480.0
-	cam_y = (y - 300.0) * -1
-	print "cam x,y ", cam_x, cam_y
+	for i in range(2):
+		x, y, p = get_closest_block("red", True)
+		cam_x = x - 480.0
+		cam_y = (y - 300.0) * -1
+		print "cam x,y ", cam_x, cam_y
 
-	'''Move to the block'''
-	calc_x = lambda y: cam_y*-1/( (600.0/(7*.0254)) )
-	calc_y = lambda x: cam_x/( (960.0/(18*.0254)) )
+		move_x = current_loc[0] + calc_x(cam_y)*1.5 + .03
+		move_y = current_loc[1] + calc_y(cam_x)*1 - .02
 
-	move_x = start[0] + calc_x(y)*1.5 + .03
-	move_y = start[1] + calc_y(x)*1 - .02
+		print "\nx, movement ", move_x, "\ny movement ", move_y
 
-	print "\nx, movement ", move_x, "\ny movement ", move_y
-	go_to(move_x, move_y, start[2])
-	rospy.sleep(1)
-	go_to(move_x, move_y, -.1)
+		go_to(move_x,move_y,0.0)
+
+	pickup(move_x,move_y,gripper)
+	go_to(*start)
+	drop(move_x, move_y, gripper)
+
 	return
 
+def pickup(x,y, gripper):
+	go_to(x, y, 0.0)
+	rospy.sleep(1)
+	go_to(x, y, -.1)
+	gripper.close()
+	rospy.sleep(1)
+	go_to(x, y, 0.0)
 
+def drop(x,y, gripper):
+	go_to(x, y, 0.0)
+	rospy.sleep(1)
+	go_to(x, y, -.1)
+	gripper.open()
+	go_to(x, y, 0.0)
 
+def calc_x(x):
+	return x*-1/( (600.0/(7*.0254)))
+
+def calc_y(y):
+	return y/( (960.0/(18*.0254)) )
 
 
 	'''Place the block based on color'''

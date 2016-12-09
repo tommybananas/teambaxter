@@ -35,11 +35,9 @@ import ik
 import get_image
 from blockVision import BlockVision
 
-global img, limb
+global img
 img = None
-# img = np.zeros((600,960,3), np.uint8)
-
-
+global config
 ## 
  # callback used by any image subscriber.
  # sets the global variable img
@@ -69,7 +67,7 @@ def get_img():
 def get_closest_block(color, showImage=False):
 	get_img()
 	vision = BlockVision(img.copy())
-	vision.granularity = 3
+	vision.granularity = 5
 	vision.showThreshold = False
 	vision.debugColors = False
 	vision.findBlocks(color)
@@ -78,6 +76,27 @@ def get_closest_block(color, showImage=False):
 		vision.showImage()  
 	y,x,p = vision.blocks[color][0]
 	return (x, y, p)
+
+def get_block(showImage=False):
+	get_img()
+	vision = BlockVision(img.copy())
+	vision.granularity = 4
+	vision.showThreshold = False
+	vision.debugColors = False
+	vision.findAllBlocks()
+	vision.drawAllCenters()
+	if showImage:
+		vision.showImage()  
+
+	blocks = []
+	for color, value in vision.blocks.iteritems():
+		if value != []:
+			for y, x, _ in value:
+				blocks += [(x, y, color)]
+	print blocks
+
+	blocks.sort(lambda (x, y, c): sqrt( (x-480)**2 + (y-300)**2 ))
+	return blocks[0]
 
 ##
  # go to the location specified by x, y, z coordinates
@@ -88,10 +107,11 @@ def go_to(x, y, z):
 	pos = ik.calc(x, y, z)
 	limb.move_to_joint_positions(pos)
 
-
-def main():
+global limb, gripper
+def initBaxter():
 	global limb
-
+	global gripper
+	global config
 	'''initialize the system'''
 	#intialize ros node
 	rospy.init_node('main_driver')
@@ -109,8 +129,16 @@ def main():
 	else:
 		print "gripper is calibrated"
 
+	config = {}
+	config['cal'] = {}
+
+def main():
+	
+	initBaxter()
+	
+
 	#move to first waypoint
-	start = (0.4, -0.2, 0.0)
+	start = (0.4, -0.2, 0)
 	table_h = -.11
 	drop_x = 527
 	drop_y = 230
@@ -119,7 +147,7 @@ def main():
 
 	'''Find a block location and color'''
 	for i in range(2):
-		x, y, p = get_closest_block("red", True)
+		x, y, p = get_closest_block('red',True)
 		cam_x = x - 480.0
 		cam_y = (y - 300.0) * -1
 		print "cam x,y ", cam_x, cam_y
@@ -131,6 +159,7 @@ def main():
 
 		go_to(move_x,move_y,0.0)
 
+	return
 	pickup(move_x,move_y,gripper)
 	go_to(*start)
 	drop(move_x, move_y, gripper)

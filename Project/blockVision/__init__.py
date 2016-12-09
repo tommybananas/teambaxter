@@ -13,7 +13,7 @@ class BlockVision:
         'green':[],
         'blue':[],
         'red':[],
-        'yellow':[]
+        # 'yellow':[]
     }
     colors = {
         'purple': {'upper': np.array([175,255,255]), 'lower': np.array([163,50,50])},
@@ -22,7 +22,7 @@ class BlockVision:
         'blue': {'upper': np.array([130,255,255]), 'lower': np.array([110, 30, 30])},
         'red': {'upper': np.array([3,255,255]), 'lower': np.array([0,30,30])},
         'red2': {'upper': np.array([180,255,255]), 'lower': np.array([177,30,30])},
-        'yellow': {'upper': np.array([30,255,255]), 'lower': np.array([24,32,20])}
+        # 'yellow': {'upper': np.array([30,255,255]), 'lower': np.array([24,32,20])}
     }
 
     def __init__(self, img):
